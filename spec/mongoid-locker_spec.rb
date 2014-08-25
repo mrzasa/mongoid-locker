@@ -25,12 +25,12 @@ describe Mongoid::Locker do
 
   describe "#locked?" do
     it "shouldn't be locked when created" do
-      @user.locked?.should be_false
+      @user.locked?.should be_falsey
     end
 
     it "should be true when locked" do
       @user.with_lock do
-        @user.locked?.should be_true
+        @user.locked?.should be_truthy
       end
     end
 
@@ -39,25 +39,25 @@ describe Mongoid::Locker do
 
       @user.with_lock do
         sleep 2
-        @user.locked?.should be_false
+        @user.locked?.should be_falsey
       end
     end
 
     it "should be true for a different instance" do
       @user.with_lock do
-        User.first.locked?.should be_true
+        User.first.locked?.should be_truthy
       end
     end
   end
 
   describe "#has_lock?" do
     it "shouldn't be has_lock when created" do
-      @user.has_lock?.should be_false
+      @user.has_lock?.should be_falsey
     end
 
     it "should be true when has_lock" do
       @user.with_lock do
-        @user.has_lock?.should be_true
+        @user.has_lock?.should be_truthy
       end
     end
 
@@ -66,13 +66,13 @@ describe Mongoid::Locker do
 
       @user.with_lock do
         sleep 2
-        @user.has_lock?.should be_false
+        @user.has_lock?.should be_falsey
       end
     end
 
     it "should be false for a different instance" do
       @user.with_lock do
-        User.first.has_lock?.should be_false
+        User.first.has_lock?.should be_falsey
       end
     end
   end
