@@ -209,7 +209,7 @@ describe Mongoid::Locker do
 
       expiration = (Time.now + 3).to_i
       @user.with_lock :timeout => 3 do
-        @user.locked_until.to_i.should eq(expiration)
+        @user.mongoid_locker_locked_until.to_i.should eq(expiration)
       end
     end
 

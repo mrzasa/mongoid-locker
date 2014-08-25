@@ -10,14 +10,14 @@ module Mongoid
       #
       # @return [Mongoid::Criteria]
       def locked
-        where :locked_until.gt => Time.now
+        where :mongoid_locker_locked_until.gt => Time.now
       end
 
       # A scope to retrieve all unlocked documents in the collection.
       #
       # @return [Mongoid::Criteria]
       def unlocked
-        any_of({:locked_until => nil}, {:locked_until.lte => Time.now})
+        any_of({:mongoid_locker_locked_until => nil}, {:mongoid_locker_locked_until.lte => Time.now})
       end
 
       # Set the default lock timeout for this class.  Note this only applies to new locks.  Defaults to five seconds.
@@ -41,8 +41,8 @@ module Mongoid
     def self.included mod
       mod.extend ClassMethods
 
-      mod.field :locked_at, :type => Time
-      mod.field :locked_until, :type => Time
+      mod.field :mongoid_locker_locked_at, :type => Time
+      mod.field :mongoid_locker_locked_until, :type => Time
     end
 
 
@@ -50,7 +50,7 @@ module Mongoid
     #
     # @return [Boolean] true if locked, false otherwise
     def locked?
-      !!(self.locked_until && self.locked_until > Time.now)
+      !!(self.mongoid_locker_locked_until && self.mongoid_locker_locked_until > Time.now)
     end
 
     # Returns whether the current instance has the lock or not.
@@ -101,23 +101,23 @@ module Mongoid
           :_id => self.id,
           '$or' => [
             # not locked
-            {:locked_until => nil},
+            {:mongoid_locker_locked_until => nil},
             # expired
-            {:locked_until => {'$lte' => time}}
+            {:mongoid_locker_locked_until => {'$lte' => time}}
           ]
         },
         {
           '$set' => {
-            :locked_at => time,
-            :locked_until => expiration
+            :mongoid_locker_locked_at => time,
+            :mongoid_locker_locked_until => expiration
           }
         }
       )
 
       if locked
         # document successfully updated, meaning it was locked
-        self.locked_at = time
-        self.locked_until = expiration
+        self.mongoid_locker_locked_at = time
+        self.mongoid_locker_locked_until = expiration
         self.reload unless opts[:reload] == false
         @has_lock = true
       else
@@ -157,14 +157,14 @@ module Mongoid
         {:_id => self.id},
         {
           '$set' => {
-            :locked_at => nil,
-            :locked_until => nil,
+            :mongoid_locker_locked_at => nil,
+            :mongoid_locker_locked_until => nil,
           }
         }
       )
 
-      self.locked_at = nil
-      self.locked_until = nil
+      self.mongoid_locker_locked_at = nil
+      self.mongoid_locker_locked_until = nil
       @has_lock = false
     end
   end

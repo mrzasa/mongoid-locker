@@ -28,15 +28,15 @@ module Mongoid
       def self.locked_until doc
         existing_query = {
           :_id => doc.id,
-          :locked_until => {'$exists' => true}
+          :mongoid_locker_locked_until => {'$exists' => true}
         }
 
         if IS_OLD_MONGOID
-          existing = doc.class.collection.find_one(existing_query, :fields => {:locked_until => 1})
-          existing ? existing['locked_until'] : nil
+          existing = doc.class.collection.find_one(existing_query, :fields => {:mongoid_locker_locked_until => 1})
+          existing ? existing['mongoid_locker_locked_until'] : nil
         else
-          existing = doc.class.where(existing_query).limit(1).only(:locked_until).first
-          existing ? existing.locked_until : nil
+          existing = doc.class.where(existing_query).limit(1).only(:mongoid_locker_locked_until).first
+          existing ? existing.mongoid_locker_locked_until : nil
         end
       end
     end
