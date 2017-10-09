@@ -157,12 +157,15 @@ module Mongoid
 
         '$set' => {
           mongoid_locker_locked_at:    nil,
-          mongoid_locker_locked_until: nil
+          mongoid_locker_locked_until: nil,
         }
 
       )
-
-      self.attributes = { mongoid_locker_locked_at: nil, mongoid_locker_locked_until: nil } unless destroyed?
+      
+      unless destroyed?
+        self.mongoid_locker_locked_at = nil
+        self.mongoid_locker_locked_until = nil
+      end
       @has_lock = false
     end
   end
