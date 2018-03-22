@@ -142,7 +142,9 @@ module Mongoid
             retry_sleep = locked_until - Time.now
           end
 
-          sleep retry_sleep if retry_sleep > 0
+          retry_sleep += SecureRandom.rand(10.0) if retry_sleep > 0
+          STDERR.puts("#{Thread.current[:id]} retry in: #{retry_sleep}".red)
+          sleep(retry_sleep)
         else
           fail LockError.new('could not get lock')
         end
@@ -161,7 +163,7 @@ module Mongoid
         }
 
       )
-      
+
       unless destroyed?
         self.mongoid_locker_locked_at = nil
         self.mongoid_locker_locked_until = nil

@@ -10,7 +10,18 @@ module Mongoid
       # @return [Boolean] true if the document was successfully updated, false otherwise
       def self.update(klass, query, setter)
         rc = klass.with(write: { w: 1 }).collection.find(query).update_one(setter)
+        STDERR.puts ['CUST-print-sleep' ,Thread.current[:id], $lock_counter, query, setter, rc.matched_count, rc.modified_count, rc.ok?, rc.documents.first['n']].to_s.blue if rc.documents.first['n'] == 1
         rc.ok? && rc.documents.first['n'] == 1
+      end
+
+      def self.update_find_and_update(klass, query, setter)
+        #rc = klass.with(write: { w: 1 }).collection.find(query).update_one(setter)
+        #rc.ok? && rc.documents.first['n'] == 1
+        #STDERR.puts ['CUST' ,Thread.current[:id], $lock_counter, query, setter, rc.matched_count, rc.modified_count, rc.ok?, rc.documents.first['n']].to_s.blue if rc.documents.first['n'] == 1
+        rc = klass.with(write: { w: 1 }).collection.find_one_and_update(query, setter, { :return_document => :after, upsert: false })
+        STDERR.puts ['CUST' ,Thread.current[:id], $lock_counter, query, setter, !!rc].to_s.blue if !!rc
+
+        !!rc
       end
 
       # Determine whether the provided document is locked in the database or not.
